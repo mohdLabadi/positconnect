@@ -21,10 +21,21 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Validate required secrets
+        run: |
+          if [ -z "${{ secrets.CONNECT_SERVER }}" ] && [ -z "${{ secrets.CONNECT_URL }}" ]; then
+            echo "Missing secret: set CONNECT_SERVER or CONNECT_URL in GitHub repository secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.CONNECT_API_KEY }}" ]; then
+            echo "Missing secret: set CONNECT_API_KEY in GitHub repository secrets."
+            exit 1
+          fi
+
       - name: Publish to Posit Connect
         uses: rstudio/actions/connect-publish@main
         with:
-          url: ${{ secrets.CONNECT_SERVER }}
+          url: ${{ secrets.CONNECT_SERVER || secrets.CONNECT_URL }}
           api-key: ${{ secrets.CONNECT_API_KEY }}
           access-type: acl
           dir: .
